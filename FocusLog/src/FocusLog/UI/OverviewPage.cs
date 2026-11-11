@@ -12,13 +12,13 @@ internal sealed class OverviewPage : IPage
     private readonly TrackerHost _h;
     private readonly StackPanel _root = new();
     private readonly TextBlock _statusText = UiKit.Caption("");
-    private readonly TextBlock _heroValue = UiKit.Txt("0m", 44, "Text", FontWeights.SemiLight, true);
+    private readonly TextBlock _heroValue = UiKit.Txt("0m", 44, "Text", FontWeights.Light, true);
     private readonly TextBlock _heroDelta = UiKit.Txt("", 12.5, "TextMuted");
     private readonly TextBlock _weekText = UiKit.Txt("", 12.5, "TextMuted");
     private readonly ProgressLine _weekBar = new();
     private readonly ContentControl _nowIcon = new();
     private readonly TextBlock _nowName = UiKit.Txt("-", 15, "Text", FontWeights.SemiBold);
-    private readonly TextBlock _nowTimer = UiKit.Txt("-", 26, "Text", FontWeights.SemiLight, true);
+    private readonly TextBlock _nowTimer = UiKit.Txt("-", 26, "Text", FontWeights.Light, true);
     private readonly TextBlock _total = UiKit.Txt("-", 13, "Text", null, true);
     private readonly TextBlock _other = UiKit.Txt("-", 13, "Text", null, true);
     private readonly TextBlock _sessAll = UiKit.Txt("-", 13, "Text", null, true);
