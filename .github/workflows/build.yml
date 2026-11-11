@@ -1,0 +1,44 @@
+name: Build FocusLog
+
+on:
+  push:
+    branches: [main, master]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      # Unit tests (state machine, midnight split, sleep gaps, DB recovery).
+      # continue-on-error so you still get the exe; check the log to see the result.
+      - name: Unit tests
+        continue-on-error: true
+        run: dotnet test tests/FocusLog.Tests/FocusLog.Tests.csproj -c Release --logger "console;verbosity=normal"
+
+      - name: Publish single-file exe
+        run: >
+          dotnet publish src/FocusLog/FocusLog.csproj -c Release -r win-x64 --self-contained true
+          -p:PublishSingleFile=true -p:PublishReadyToRun=true -o publish
+
+      - name: Package
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force dist/portable | Out-Null
+          Copy-Item publish/FocusLog.exe dist/FocusLog.exe
+          Copy-Item publish/FocusLog.exe dist/portable/
+          Copy-Item README.md, LICENSE, config/settings.sample.json dist/portable/
+          Compress-Archive -Path dist/portable/* -DestinationPath dist/FocusLog-portable.zip
+          Remove-Item -Recurse -Force dist/portable
+          Get-ChildItem dist | Format-Table Name, Length
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: FocusLog
+          path: dist/*
+          if-no-files-found: error
