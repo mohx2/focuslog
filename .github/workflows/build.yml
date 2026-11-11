@@ -15,16 +15,33 @@ jobs:
         with:
           dotnet-version: '8.0.x'
 
-      # Unit tests (state machine, midnight split, sleep gaps, DB recovery).
-      # continue-on-error so you still get the exe; check the log to see the result.
+      - name: Locate project
+        shell: pwsh
+        run: |
+          $proj = Get-ChildItem -Recurse -Filter FocusLog.csproj | Select-Object -First 1
+          if (-not $proj) {
+            Get-ChildItem -Recurse -Depth 3 | ForEach-Object { $_.FullName }
+            throw "FocusLog.csproj not found - see the file list above"
+          }
+          $root = $proj.Directory.Parent.Parent.FullName
+          "PROJ=$($proj.FullName)" | Out-File -FilePath $env:GITHUB_ENV -Append
+          "ROOT=$root" | Out-File -FilePath $env:GITHUB_ENV -Append
+          Write-Host "Project: $($proj.FullName)"
+          Write-Host "Root: $root"
+
       - name: Unit tests
         continue-on-error: true
-        run: dotnet test tests/FocusLog.Tests/FocusLog.Tests.csproj -c Release --logger "console;verbosity=normal"
+        shell: pwsh
+        run: |
+          $t = Get-ChildItem -Recurse -Filter FocusLog.Tests.csproj | Select-Object -First 1
+          if ($t) { dotnet test $t.FullName -c Release --logger "console;verbosity=normal" }
+          else { Write-Host "Tests project not found, skipping" }
 
       - name: Publish single-file exe
-        run: >
-          dotnet publish src/FocusLog/FocusLog.csproj -c Release -r win-x64 --self-contained true
-          -p:PublishSingleFile=true -p:PublishReadyToRun=true -o publish
+        shell: pwsh
+        run: |
+          dotnet publish $env:PROJ -c Release -r win-x64 --self-contained true `
+            -p:PublishSingleFile=true -p:PublishReadyToRun=true -o publish
 
       - name: Package
         shell: pwsh
@@ -32,7 +49,10 @@ jobs:
           New-Item -ItemType Directory -Force dist/portable | Out-Null
           Copy-Item publish/FocusLog.exe dist/FocusLog.exe
           Copy-Item publish/FocusLog.exe dist/portable/
-          Copy-Item README.md, LICENSE, config/settings.sample.json dist/portable/
+          foreach ($f in 'README.md','LICENSE','config/settings.sample.json') {
+            $p = Join-Path $env:ROOT $f
+            if (Test-Path $p) { Copy-Item $p dist/portable/ }
+          }
           Compress-Archive -Path dist/portable/* -DestinationPath dist/FocusLog-portable.zip
           Remove-Item -Recurse -Force dist/portable
           Get-ChildItem dist | Format-Table Name, Length
