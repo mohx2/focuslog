@@ -9,7 +9,7 @@ using FocusLog.Native;
 
 namespace FocusLog.UI;
 
-internal partial class MainWindow : Window
+public partial class MainWindow : Window
 {
     private readonly TrackerHost _host;
     private readonly DispatcherTimer _live = new() { Interval = TimeSpan.FromSeconds(1) };
@@ -17,7 +17,7 @@ internal partial class MainWindow : Window
     private string _key = "overview";
     private int _sec;
 
-    public MainWindow(TrackerHost host)
+    internal MainWindow(TrackerHost host)
     {
         _host = host;
         InitializeComponent();
