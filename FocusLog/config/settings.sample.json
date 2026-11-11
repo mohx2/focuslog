@@ -1,0 +1,14 @@
+{
+  "CloseToTray": true,
+  "LaunchAtStartup": false,
+  "ClassifySitesByTitle": true,
+  "MinSessionSeconds": 2,
+  "WeeklyGoalHours": 15,
+  "StudyLabel": "Claude",
+  "Accent": "#7C8AF5",
+  "StudyAppKeys": [ "claude.exe" ],
+  "BrowserExes": [ "chrome.exe", "msedge.exe", "firefox.exe", "brave.exe", "opera.exe", "vivaldi.exe" ],
+  "SiteRules": [
+    { "Key": "site:youtube", "Name": "YouTube", "Pattern": "(^\\s*(\\(\\d+\\)\\s*)?|[-\\u2013\\u2014|]\\s*)YouTube\\s*($|[-\\u2013\\u2014|]|and \\d+ more)" }
+  ]
+}
